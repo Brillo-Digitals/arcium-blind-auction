@@ -89,7 +89,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#0a0a0f] text-slate-100 px-4 py-8">
       {/* Header */}
-      <div className="max-w-5xl mx-auto mb-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto mb-10 sm:mb-16 flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6 sm:gap-0 text-center sm:text-left">
         <div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-violet-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent drop-shadow-sm">
             Arcium Blind Auction
@@ -224,7 +224,7 @@ export default function HomePage() {
           {status === "sending" && (
             <div className="flex flex-col items-center justify-center py-6">
               <div className="text-4xl mb-3 animate-bounce">📡</div>
-              <div className="text-indigo-400 font-bold animate-pulse text-lg">Sending to Solana Devnet...</div>
+              <div className="text-indigo-400 font-bold animate-pulse text-lg">Sending to Solana Testnet...</div>
             </div>
           )}
           {status === "error" && (
@@ -243,7 +243,7 @@ export default function HomePage() {
             You'll be notified when Arcium reveals the winner.
           </p>
           <a
-            href={`https://explorer.solana.com/tx/${txSig}?cluster=devnet`}
+            href={`https://explorer.solana.com/tx/${txSig}?cluster=testnet`}
             target="_blank"
             rel="noreferrer"
             className="text-violet-400 hover:underline text-sm break-all"
@@ -260,12 +260,12 @@ export default function HomePage() {
       )}
 
       {/* Footer */}
-      <div className="max-w-5xl mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col items-center gap-4">
-        <div className="flex items-center gap-6 text-[11px] font-medium tracking-widest uppercase text-slate-500">
+      <div className="max-w-5xl mx-auto mt-24 pt-8 border-t border-white/5 flex flex-col items-center gap-4 text-center px-4">
+        <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 text-[10px] sm:text-[11px] font-medium tracking-widest uppercase text-slate-500">
           <span className="hover:text-violet-400 cursor-default transition-colors">Privacy First</span>
-          <span className="w-1 h-1 rounded-full bg-slate-800" />
-          <span className="hover:text-violet-400 cursor-default transition-colors">Solana Devnet</span>
-          <span className="w-1 h-1 rounded-full bg-slate-800" />
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-800" />
+          <span className="hover:text-violet-400 cursor-default transition-colors">Solana Testnet</span>
+          <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-800" />
           <span className="hover:text-violet-400 cursor-default transition-colors">Arcium MPC</span>
         </div>
         <div className="text-slate-400 font-semibold tracking-wide text-xs mt-2">
