@@ -11,11 +11,14 @@ async function mockEncryptBid(amount: number, bidderKey: string): Promise<Uint8A
   return new TextEncoder().encode(payload);
 }
 
-// --- Demo auction data (High-Stakes assets for RTG Demo) ---
+// --- Demo auction data (High-Stakes assets for RTG Demo + Testnet Testing) ---
 const DEMO_AUCTIONS = [
   { id: "1", title: "Jupiter (JUP) 1M OTC Block", image: "🪐", minBid: 50000, ends: "2h 14m", bids: 7 },
   { id: "2", title: "Miami Penthouse Deed #41", image: "🏢", minBid: 150000, ends: "6h 00m", bids: 12 },
-  { id: "3", title: "Solana Zero-Day Bounty", image: "🛡️", minBid: 25000, ends: "23h 58m", bids: 3 },
+  { id: "3", title: "Solana Zero-Day Bounty", image: "🛡️", minBid: 25000, ends: "23h 58m", bids: 9 },
+  { id: "4", title: "Arcium Beta Node Key (Test)", image: "🔑", minBid: 5, ends: "4h 30m", bids: 18 },
+  { id: "5", title: "Exclusive Alpha Access", image: "👑", minBid: 25, ends: "1h 12m", bids: 42 },
+  { id: "6", title: "Custom .sol Domain", image: "🪪", minBid: 10, ends: "5h 45m", bids: 3 }
 ];
 
 export default function HomePage() {
