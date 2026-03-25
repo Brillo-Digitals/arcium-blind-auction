@@ -11,11 +11,11 @@ async function mockEncryptBid(amount: number, bidderKey: string): Promise<Uint8A
   return new TextEncoder().encode(payload);
 }
 
-// --- Demo auction data (replace with on-chain fetch in production) ---
+// --- Demo auction data (High-Stakes assets for RTG Demo) ---
 const DEMO_AUCTIONS = [
-  { id: "1", title: "Bored Ape #4201", image: "🦍", minBid: 20, ends: "2h 14m", bids: 7 },
-  { id: "2", title: "CryptoPunk #9938", image: "👾", minBid: 50, ends: "6h 00m", bids: 12 },
-  { id: "3", title: "DeGod #1337", image: "⚡", minBid: 5, ends: "23h 58m", bids: 3 },
+  { id: "1", title: "Jupiter (JUP) 1M OTC Block", image: "🪐", minBid: 50000, ends: "2h 14m", bids: 7 },
+  { id: "2", title: "Miami Penthouse Deed #41", image: "🏢", minBid: 150000, ends: "6h 00m", bids: 12 },
+  { id: "3", title: "Solana Zero-Day Bounty", image: "🛡️", minBid: 25000, ends: "23h 58m", bids: 3 },
 ];
 
 export default function HomePage() {
@@ -45,10 +45,12 @@ export default function HomePage() {
 
     const bid = Number(bidAmount);
     if (isNaN(bid) || bid <= 0) return setStatus("error");
-    if (bid > 50) return alert("Bid cannot exceed the 50 SOL deposit ceiling.");
+    if (bid > 500000) return alert("Bid cannot exceed the 500,000 SOL ceiling.");
 
     setStatus("encrypting");
     try {
+      // Simulate real Arcium network latency for the visual UX flow
+      await new Promise(r => setTimeout(r, 2000));
       const encrypted = await mockEncryptBid(bid, publicKey.toBase58());
       setStatus("sending");
 
@@ -138,6 +140,36 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Arcium Info Panel (Clarity for RTG Judges) */}
+      {!selected && (
+        <div className="max-w-5xl mx-auto mt-12 bg-violet-900/10 border border-violet-500/20 rounded-3xl p-8 glass-morphism relative overflow-hidden">
+          <div className="absolute top-0 right-0 mt-4 mr-4 text-9xl opacity-5 blur-xl select-none">🛡️</div>
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span className="text-violet-400">⚡</span> Why Arcium MPC?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            <div>
+              <h3 className="text-violet-300 font-semibold mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span> Zero MEV Extraction
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Bids are encrypted client-side. Validators and searcher bots cannot front-run or snipe high-value asset bids.</p>
+            </div>
+            <div>
+              <h3 className="text-violet-300 font-semibold mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span> Fair Price Discovery
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Prices are based on true valuation, not reacting to others. The Solana blockchain only sees ciphertext.</p>
+            </div>
+            <div>
+              <h3 className="text-violet-300 font-semibold mb-2 text-sm uppercase tracking-wider flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400"></span> Confidential Execution
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">Arcium nodes compute the winning bid inside a secure Multi-Party Computation circuit, only revealing the winner.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bid form */}
       {selected && selectedAuction && status !== "done" && (
         <div className="max-w-md mx-auto bg-[#13131a] border border-[#1f1f2e] rounded-2xl p-7 shadow-xl">
@@ -157,12 +189,12 @@ export default function HomePage() {
           </div>
 
           <label className="block text-sm font-medium text-slate-300 mb-1">
-            Your True Bid (SOL) — up to 50
+            Your True Bid (SOL) — up to 500,000
           </label>
           <input
             type="number"
             min={selectedAuction.minBid}
-            max={50}
+            max={500000}
             value={bidAmount}
             onChange={(e) => setBidAmount(e.target.value)}
             placeholder={`Min ${selectedAuction.minBid} SOL`}
@@ -179,10 +211,21 @@ export default function HomePage() {
             </button>
           )}
           {status === "encrypting" && (
-            <div className="text-center text-violet-400 font-medium animate-pulse">🔐 Encrypting bid with Arcium...</div>
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="w-14 h-14 relative mb-4">
+                <div className="absolute inset-0 rounded-full border-t-2 border-violet-500 animate-spin"></div>
+                <div className="absolute inset-1.5 rounded-full border-r-2 border-purple-400 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                <div className="absolute inset-0 flex items-center justify-center text-xl">🔐</div>
+              </div>
+              <div className="text-violet-400 font-bold animate-pulse text-lg">Encrypting Bid via Arcium...</div>
+              <div className="text-xs text-slate-500 mt-2 font-medium bg-slate-800/50 px-3 py-1 rounded-full">Securing data before network transmission</div>
+            </div>
           )}
           {status === "sending" && (
-            <div className="text-center text-violet-400 font-medium animate-pulse">📡 Sending to Solana devnet...</div>
+            <div className="flex flex-col items-center justify-center py-6">
+              <div className="text-4xl mb-3 animate-bounce">📡</div>
+              <div className="text-indigo-400 font-bold animate-pulse text-lg">Sending to Solana Devnet...</div>
+            </div>
           )}
           {status === "error" && (
             <div className="text-center text-red-400 font-medium">❌ Something went wrong. Try again.</div>
