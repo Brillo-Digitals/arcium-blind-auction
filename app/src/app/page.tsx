@@ -58,8 +58,8 @@ export default function HomePage() {
       setStatus("sending");
 
       const ix = new TransactionInstruction({
-        keys: [{ pubkey: publicKey, isSigner: true, isWritable: false }],
-        programId: new PublicKey("11111111111111111111111111111111"),
+        keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
+        programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLcaNiUP"), // SPL Memo Program
         data: Buffer.from(encrypted),
       });
       const tx = new Transaction().add(ix);
