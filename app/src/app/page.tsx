@@ -57,14 +57,31 @@ export default function HomePage() {
       const encrypted = await mockEncryptBid(bid, publicKey.toBase58());
       setStatus("sending");
 
+      // Fetch a fresh blockhash so the tx is valid and confirmTransaction won't throw
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+
+      // Use Uint8Array directly — Buffer is a Node.js API and not available in the browser bundle.
+      // Cast satisfies @solana/web3.js's Buffer type; Uint8Array is wire-compatible at runtime.
+      const memoData = (encrypted instanceof Uint8Array ? encrypted : new TextEncoder().encode(String(encrypted))) as unknown as Buffer;
+
       const ix = new TransactionInstruction({
         keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
         programId: new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLcaNiUP"), // SPL Memo Program
-        data: Buffer.from(encrypted),
+        data: memoData,
       });
-      const tx = new Transaction().add(ix);
+
+      const tx = new Transaction({
+        recentBlockhash: blockhash,
+        feePayer: publicKey,
+      }).add(ix);
+
       const sig = await sendTransaction(tx, connection);
-      await connection.confirmTransaction(sig, "confirmed");
+
+      // Use the blockhash-based overload (signature-only form is deprecated and may throw)
+      await connection.confirmTransaction(
+        { signature: sig, blockhash, lastValidBlockHeight },
+        "confirmed"
+      );
 
       setTxSig(sig);
       setStatus("done");
