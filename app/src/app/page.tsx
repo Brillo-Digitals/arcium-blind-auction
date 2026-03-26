@@ -46,6 +46,12 @@ export default function HomePage() {
   const [status, setStatus] = useState<"idle" | "encrypting" | "sending" | "done" | "error">("idle");
   const [txSig, setTxSig] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [bidHistory, setBidHistory] = useState<{title: string, amount: number, tx: string, time: string}[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("arcium_local_bids");
+    if (saved) setBidHistory(JSON.parse(saved));
+  }, []);
 
   const selectedAuction = DEMO_AUCTIONS.find((a) => a.id === selected);
 
@@ -83,11 +89,16 @@ export default function HomePage() {
 
       const sig = await sendTransaction(tx, connection);
 
-      // Use the blockhash-based overload (signature-only form is deprecated and may throw)
+      // Use the blockhash-based overload
       await connection.confirmTransaction(
         { signature: sig, blockhash, lastValidBlockHeight },
         "confirmed"
       );
+
+      const newBid = { title: selectedAuction.title, amount: bid, tx: sig, time: new Date().toLocaleTimeString() };
+      const updatedHistory = [newBid, ...bidHistory];
+      setBidHistory(updatedHistory);
+      localStorage.setItem("arcium_local_bids", JSON.stringify(updatedHistory));
 
       setTxSig(sig);
       setStatus("done");
@@ -331,6 +342,32 @@ export default function HomePage() {
               </div>
               <div className="text-xs text-slate-500 font-mono hidden sm:block">15m ago</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* User's Local Bid History */}
+      {!selected && bidHistory.length > 0 && (
+        <div className="max-w-5xl mx-auto mt-8 bg-zinc-900/30 border border-white/5 rounded-3xl p-8">
+          <h2 className="text-xl font-bold text-slate-200 mb-6 flex items-center gap-2">
+            <span className="text-amber-500">📥</span> Your Bid History
+          </h2>
+          <div className="space-y-3">
+            {bidHistory.map((b, i) => (
+              <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-zinc-950/50 rounded-xl border border-white/5 gap-3 sm:gap-0">
+                <div className="flex items-center gap-3">
+                  <div className="text-sm font-semibold text-white">{b.title}</div>
+                  <div className="text-xs text-slate-500 hidden sm:block">•</div>
+                  <div className="text-xs text-slate-500">{b.time}</div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm font-mono text-amber-400">{b.amount} SOL</div>
+                  <a href={`https://explorer.solana.com/tx/${b.tx}?cluster=testnet`} target="_blank" rel="noreferrer" className="text-xs text-slate-400 hover:text-amber-400 transition-colors bg-zinc-900 px-3 py-1 rounded-full border border-white/5">
+                    View Tx ↗
+                  </a>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
