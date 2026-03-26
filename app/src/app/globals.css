@@ -8,8 +8,8 @@
   --bg: #030305;
   --surface: rgba(19, 19, 26, 0.7);
   --border: rgba(31, 31, 46, 0.5);
-  --purple: #8b5cf6;
-  --purple-glow: rgba(139, 92, 246, 0.3);
+  --yellow: #8b5cf6;
+  --yellow-glow: rgba(139, 92, 246, 0.3);
 }
 
 * { box-sizing: border-box; }
@@ -35,7 +35,7 @@ body {
 }
 
 .card-glow:hover {
-  box-shadow: 0 0 20px 0 var(--purple-glow);
+  box-shadow: 0 0 20px 0 var(--yellow-glow);
   border-color: rgba(139, 92, 246, 0.5);
 }
 
@@ -63,5 +63,5 @@ body {
 }
 
 .wallet-adapter-button-trigger {
-  background: var(--purple) !important;
+  background: var(--yellow) !important;
 }

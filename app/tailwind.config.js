@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'violet-glow': '#a78bfa',
+        'amber-glow': '#a78bfa',
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
