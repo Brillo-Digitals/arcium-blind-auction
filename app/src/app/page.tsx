@@ -6,9 +6,14 @@ import { WalletButton } from "@/components/WalletButton";
 import { PublicKey, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
 
 // --- Mock Arcium encryption (replace with real SDK in production) ---
-async function mockEncryptBid(amount: number, bidderKey: string): Promise<Uint8Array> {
-  const payload = JSON.stringify({ amount, bidder: bidderKey, nonce: Date.now() });
-  return new TextEncoder().encode(payload);
+// Returns a compact hex string that fits within the SPL Memo program's data limit.
+// The real Arcium SDK would return a fixed-size ciphertext instead.
+async function mockEncryptBid(amount: number, bidderKey: string): Promise<string> {
+  const payload = `arcium:${bidderKey.slice(0, 8)}:${amount}:${Date.now()}`;
+  // Use SubtleCrypto to produce a 32-byte SHA-256 "commitment" — stays well under tx size limits
+  const msgBuffer = new TextEncoder().encode(payload);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
 // --- Demo auction data (High-Stakes assets for RTG Demo + Testnet Testing) ---
@@ -40,6 +45,7 @@ export default function HomePage() {
   const [bidAmount, setBidAmount] = useState("");
   const [status, setStatus] = useState<"idle" | "encrypting" | "sending" | "done" | "error">("idle");
   const [txSig, setTxSig] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const selectedAuction = DEMO_AUCTIONS.find((a) => a.id === selected);
 
@@ -51,18 +57,19 @@ export default function HomePage() {
     if (bid > 500000) return alert("Bid cannot exceed the 500,000 SOL ceiling.");
 
     setStatus("encrypting");
+    setErrorMsg("");
     try {
       // Simulate real Arcium network latency for the visual UX flow
       await new Promise(r => setTimeout(r, 2000));
-      const encrypted = await mockEncryptBid(bid, publicKey.toBase58());
+      // mockEncryptBid now returns a compact 64-char hex string (SHA-256 commitment)
+      const commitment = await mockEncryptBid(bid, publicKey.toBase58());
       setStatus("sending");
 
       // Fetch a fresh blockhash so the tx is valid and confirmTransaction won't throw
       const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
 
-      // Use Uint8Array directly — Buffer is a Node.js API and not available in the browser bundle.
-      // Cast satisfies @solana/web3.js's Buffer type; Uint8Array is wire-compatible at runtime.
-      const memoData = (encrypted instanceof Uint8Array ? encrypted : new TextEncoder().encode(String(encrypted))) as unknown as Buffer;
+      // Encode the compact hex commitment as UTF-8 — well within the memo program's data limit
+      const memoData = new TextEncoder().encode(commitment) as unknown as Buffer;
 
       const ix = new TransactionInstruction({
         keys: [{ pubkey: publicKey, isSigner: true, isWritable: true }],
@@ -86,7 +93,9 @@ export default function HomePage() {
       setTxSig(sig);
       setStatus("done");
     } catch (e) {
-      console.error(e);
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[submitBid] error:", msg, e);
+      setErrorMsg(msg);
       setStatus("error");
     }
   }, [publicKey, selectedAuction, bidAmount, sendTransaction, connection]);
@@ -248,7 +257,14 @@ export default function HomePage() {
             </div>
           )}
           {status === "error" && (
-            <div className="text-center text-red-400 font-medium">❌ Something went wrong. Try again.</div>
+            <div className="text-center text-red-400 font-medium">
+              <div>❌ Something went wrong. Try again.</div>
+              {errorMsg && (
+                <div className="mt-2 text-xs text-red-300/70 font-mono break-all bg-red-900/20 rounded p-2">
+                  {errorMsg}
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
