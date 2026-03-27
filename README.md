@@ -2,7 +2,7 @@
 
 A privacy-preserving, decentralized blind auction platform built on **Solana** and powered by **Arcium MPC**. 
 
-![Arcium Blind Auction UI](/C:/Users/USER/.gemini/antigravity/brain/b0c8d461-c252-498e-8c93-67c07ac72d2c/full_page_localhost_3000_verified_1774449705802.png)
+![Arcium Blind Auction UI](https://i.ibb.co/Zp7Fk64h/image.png)
 
 ## 🏆 Arcium RTG Challenge Alignment
 
